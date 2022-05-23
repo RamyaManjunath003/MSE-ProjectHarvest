@@ -1,0 +1,5 @@
+Energy optimization
+for energy optimization, I redefine the dimensions of the truck
+more weight means more energy comsumption
+so I switch the truck from heavy one to much lighter one
+Also, I use different tyres. Using it can help the truck save more fuel, and load more stuff
