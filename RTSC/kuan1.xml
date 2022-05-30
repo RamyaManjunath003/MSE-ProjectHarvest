@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+chan move, continue_on_btrack, pickup, continue_on_strack, upload, back_to_start_position, back_to_idle;</declaration>
+	<template>
+		<name x="5" y="5">Clip</name>
+		<declaration>// Place local declarations here.
+clock wait;</declaration>
+		<location id="id0" x="-519" y="-196">
+			<name x="-536" y="-230">start</name>
+		</location>
+		<location id="id1" x="-281" y="-306">
+			<name x="-306" y="-340">perform_pickup</name>
+		</location>
+		<location id="id2" x="-102" y="-68">
+			<name x="-145" y="-51">perform_unload</name>
+		</location>
+		<location id="id3" x="-306" y="-68">
+			<name x="-349" y="-51">perform_return</name>
+		</location>
+		<location id="id4" x="-391" y="-306">
+			<name x="-468" y="-289">move_to_bale_location</name>
+		</location>
+		<location id="id5" x="-102" y="-306">
+			<name x="-179" y="-289">move_to_specific_location</name>
+		</location>
+		<init ref="id0"/>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id5"/>
+			<label kind="synchronisation" x="-153" y="-467">continue_on_strack!</label>
+			<nail x="-9" y="-442"/>
+			<nail x="-187" y="-442"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="-442" y="-467">continue_on_btrack!</label>
+			<nail x="-298" y="-442"/>
+			<nail x="-476" y="-442"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-272" y="-93">back_to_start_position!</label>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-94" y="-204">upload!</label>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id5"/>
+			<label kind="synchronisation" x="-229" y="-306">move!</label>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-365" y="-331">pickup!</label>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="-501" y="-268">move!</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-493" y="-127">back_to_idle!</label>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+clip1 = Clip();
+// List one or more processes to be composed into a system.
+system clip1;
+    </system>
+	<queries>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>

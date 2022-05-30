@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+chan move, continue_on_btrack, pickup, continue_on_strack, unload, continue_to_new_bale, end_of_track;
+bool bale_remaining = true;
+bool obstacle = true;</declaration>
+	<template>
+		<name x="5" y="5">Car</name>
+		<declaration>// Place local declarations here.
+clock wait;</declaration>
+		<location id="id0" x="-519" y="-196">
+			<name x="-536" y="-230">start</name>
+		</location>
+		<location id="id1" x="-238" y="-306">
+			<name x="-263" y="-340">perform_pickup</name>
+		</location>
+		<location id="id2" x="-102" y="-68">
+			<name x="-145" y="-51">perform_unload</name>
+		</location>
+		<location id="id3" x="-391" y="-306">
+			<name x="-552" y="-323">move_to_bale_location</name>
+		</location>
+		<location id="id4" x="-102" y="-306">
+			<name x="-179" y="-289">move_to_specific_location</name>
+		</location>
+		<location id="id5" x="-391" y="-59">
+			<name x="-408" y="-42">exit</name>
+		</location>
+		<init ref="id0"/>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id5"/>
+			<label kind="synchronisation" x="-450" y="-161">end_of_track!</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-331" y="-204">continue_to_new_bale!</label>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-94" y="-204">unload!</label>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="-195" y="-306">move!</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-340" y="-331">pickup!</label>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-501" y="-268">move!</label>
+		</transition>
+	</template>
+	<template>
+		<name>Lane</name>
+		<declaration>clock wait;</declaration>
+		<location id="id6" x="-433" y="42">
+			<name x="-484" y="8">street_beginning</name>
+		</location>
+		<location id="id7" x="-178" y="42">
+			<name x="-272" y="59">move_to_bale_location</name>
+		</location>
+		<location id="id8" x="-178" y="-161">
+			<name x="-255" y="-195">pickingup_bale</name>
+		</location>
+		<location id="id9" x="59" y="-161">
+			<name x="-17" y="-195">move_to_desired_location</name>
+		</location>
+		<location id="id10" x="59" y="42">
+			<name x="85" y="25">unloading_bale</name>
+		</location>
+		<location id="id11" x="59" y="187">
+			<name x="25" y="204">end_of_grid</name>
+		</location>
+		<location id="id12" x="-178" y="195">
+			<name x="-221" y="212">obstacle_on_path</name>
+		</location>
+		<init ref="id6"/>
+		<transition>
+			<source ref="id12"/>
+			<target ref="id7"/>
+			<label kind="synchronisation" x="-170" y="102">move?</label>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id12"/>
+			<label kind="guard" x="-425" y="110">obstacle == true</label>
+			<label kind="synchronisation" x="-340" y="127">move?</label>
+			<label kind="assignment" x="-357" y="153">obstacle = false</label>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id11"/>
+			<label kind="guard" x="68" y="76">bale_remaining == false</label>
+			<label kind="synchronisation" x="68" y="93">end_of_track?</label>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-127" y="0">bale_remaining == true</label>
+			<label kind="synchronisation" x="-127" y="17">continue_to_new_bale?</label>
+		</transition>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id10"/>
+			<label kind="synchronisation" x="68" y="-76">unload?</label>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id9"/>
+			<label kind="synchronisation" x="-85" y="-187">move?</label>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id8"/>
+			<label kind="synchronisation" x="-238" y="-76">pickup?</label>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-365" y="0">obstacle == false</label>
+			<label kind="synchronisation" x="-331" y="17">move?</label>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+car1 = Car();
+car2 = Car();
+car3 = Car();
+car4 = Car();
+//track = Lane();
+track1 = Lane();
+track2 = Lane();
+track3 = Lane();
+track4 = Lane();
+// List one or more processes to be composed into a system.
+//system car1, car2, track1, track2;
+system car1, car2, car3, car4, track1, track2, track3, track4;
+//system car1, car2, car3, track;
+    </system>
+	<queries>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>
