@@ -10,24 +10,70 @@ bool obstacle = true;</declaration>
 		<declaration>// Place local declarations here.
 clock wait;</declaration>
 		<location id="id0" x="-595" y="-306">
-			<name x="-612" y="-340">start</name>
+			<name x="-646" y="-314">start</name>
 		</location>
 		<location id="id1" x="-238" y="-306">
 			<name x="-263" y="-340">perform_pickup</name>
 		</location>
-		<location id="id2" x="-102" y="-68">
-			<name x="-145" y="-51">perform_unload</name>
+		<location id="id2" x="-102" y="-119">
+			<name x="-145" y="-102">perform_unload</name>
 		</location>
 		<location id="id3" x="-391" y="-306">
-			<name x="-493" y="-348">move_to_bale_location</name>
+			<name x="-467" y="-297">move_to_bale_location</name>
 		</location>
 		<location id="id4" x="-102" y="-306">
 			<name x="-76" y="-314">move_to_specific_location</name>
 		</location>
-		<location id="id5" x="-391" y="-68">
-			<name x="-408" y="-51">exit</name>
+		<location id="id5" x="8" y="-119">
+			<name x="-9" y="-102">exit</name>
+		</location>
+		<location id="id6" x="-595" y="-433">
+			<name x="-663" y="-476">obstacles_on_path</name>
+		</location>
+		<location id="id7" x="-391" y="-433">
+			<name x="-425" y="-476">avoid_obstacles</name>
+		</location>
+		<location id="id8" x="-391" y="-119">
+			<name x="-459" y="-102">Aobstalces_on_path</name>
+		</location>
+		<location id="id9" x="-561" y="-229">
+			<name x="-689" y="-238">Avoid_obstacles</name>
 		</location>
 		<init ref="id0"/>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-536" y="-272">move!</label>
+			<label kind="assignment" x="-603" y="-280">obstacle = true</label>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id9"/>
+			<label kind="synchronisation" x="-510" y="-170">move!</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-314" y="-161">obstacle == true</label>
+			<label kind="synchronisation" x="-289" y="-144">move!</label>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-382" y="-391">move!</label>
+			<label kind="assignment" x="-382" y="-374">obstacle = false</label>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id7"/>
+			<label kind="synchronisation" x="-510" y="-459">move!</label>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id6"/>
+			<label kind="guard" x="-586" y="-399">obstacle == true</label>
+			<label kind="synchronisation" x="-586" y="-382">move!</label>
+		</transition>
 		<transition>
 			<source ref="id2"/>
 			<target ref="id5"/>
@@ -36,7 +82,8 @@ clock wait;</declaration>
 		<transition>
 			<source ref="id2"/>
 			<target ref="id3"/>
-			<label kind="synchronisation" x="-425" y="-204">continue_to_new_bale!</label>
+			<label kind="guard" x="-263" y="-255">obstacle == false</label>
+			<label kind="synchronisation" x="-280" y="-238">continue_to_new_bale!</label>
 		</transition>
 		<transition>
 			<source ref="id4"/>
@@ -56,255 +103,258 @@ clock wait;</declaration>
 		<transition>
 			<source ref="id0"/>
 			<target ref="id3"/>
-			<label kind="synchronisation" x="-510" y="-306">move!</label>
+			<label kind="guard" x="-552" y="-348">obstacle == false</label>
+			<label kind="synchronisation" x="-510" y="-331">move!</label>
 		</transition>
 	</template>
 	<template>
 		<name>Lane</name>
 		<declaration>clock wait;</declaration>
-		<location id="id6" x="-433" y="42">
+		<location id="id10" x="-433" y="42">
 			<name x="-484" y="8">street_beginning</name>
 		</location>
-		<location id="id7" x="-178" y="42">
+		<location id="id11" x="-178" y="42">
 			<name x="-272" y="68">move_to_bale_location</name>
 		</location>
-		<location id="id8" x="-178" y="-161">
+		<location id="id12" x="-178" y="-161">
 			<name x="-255" y="-195">pickingup_bale</name>
 		</location>
-		<location id="id9" x="59" y="-161">
+		<location id="id13" x="59" y="-161">
 			<name x="-17" y="-195">move_to_desired_location</name>
 		</location>
-		<location id="id10" x="59" y="42">
+		<location id="id14" x="59" y="42">
 			<name x="85" y="25">unloading_bale</name>
 		</location>
-		<location id="id11" x="59" y="187">
+		<location id="id15" x="59" y="187">
 			<name x="25" y="204">end_of_grid</name>
 		</location>
-		<location id="id12" x="-178" y="195">
+		<location id="id16" x="-178" y="195">
 			<name x="-221" y="212">obstacle_on_path</name>
 		</location>
-		<init ref="id6"/>
+		<init ref="id10"/>
 		<transition>
-			<source ref="id12"/>
-			<target ref="id7"/>
+			<source ref="id16"/>
+			<target ref="id11"/>
 			<label kind="synchronisation" x="-170" y="102">move?</label>
 		</transition>
 		<transition>
-			<source ref="id6"/>
-			<target ref="id12"/>
+			<source ref="id10"/>
+			<target ref="id16"/>
 			<label kind="guard" x="-425" y="110">obstacle == true</label>
 			<label kind="synchronisation" x="-348" y="127">move?</label>
 			<label kind="assignment" x="-365" y="144">obstacle = false</label>
 		</transition>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id11"/>
+			<source ref="id14"/>
+			<target ref="id15"/>
 			<label kind="guard" x="68" y="76">bale_remaining == false</label>
 			<label kind="synchronisation" x="68" y="93">end_of_track?</label>
 		</transition>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id7"/>
+			<source ref="id14"/>
+			<target ref="id11"/>
 			<label kind="guard" x="-127" y="0">bale_remaining == true</label>
 			<label kind="synchronisation" x="-127" y="17">continue_to_new_bale?</label>
 		</transition>
 		<transition>
-			<source ref="id9"/>
-			<target ref="id10"/>
+			<source ref="id13"/>
+			<target ref="id14"/>
 			<label kind="synchronisation" x="68" y="-76">unload?</label>
 		</transition>
 		<transition>
-			<source ref="id8"/>
-			<target ref="id9"/>
+			<source ref="id12"/>
+			<target ref="id13"/>
 			<label kind="synchronisation" x="-85" y="-187">move?</label>
 		</transition>
 		<transition>
-			<source ref="id7"/>
-			<target ref="id8"/>
+			<source ref="id11"/>
+			<target ref="id12"/>
 			<label kind="synchronisation" x="-238" y="-76">pickup?</label>
 		</transition>
 		<transition>
-			<source ref="id6"/>
-			<target ref="id7"/>
+			<source ref="id10"/>
+			<target ref="id11"/>
 			<label kind="guard" x="-365" y="0">obstacle == false</label>
 			<label kind="synchronisation" x="-331" y="17">move?</label>
 		</transition>
 	</template>
 	<template>
 		<name>Path</name>
-		<location id="id13" x="-611" y="68">
+		<location id="id17" x="-611" y="68">
 			<name x="-662" y="34">street_beginning</name>
 		</location>
-		<location id="id14" x="-356" y="68">
+		<location id="id18" x="-356" y="68">
 			<name x="-433" y="94">move_to_bale_location</name>
 		</location>
-		<location id="id15" x="-356" y="-135">
+		<location id="id19" x="-356" y="-135">
 			<name x="-475" y="-144">pickingup_bale</name>
 		</location>
-		<location id="id16" x="-119" y="-135">
+		<location id="id20" x="-119" y="-135">
 			<name x="-102" y="-144">move_to_desired_location</name>
 		</location>
-		<location id="id17" x="-119" y="68">
+		<location id="id21" x="-119" y="68">
 			<name x="-93" y="51">unloading_bale</name>
 		</location>
-		<location id="id18" x="-119" y="213">
+		<location id="id22" x="-119" y="213">
 			<name x="-153" y="230">end_of_grid</name>
 		</location>
-		<location id="id19" x="-611" y="213">
+		<location id="id23" x="-611" y="213">
 			<name x="-654" y="230">obstacle1_on_path</name>
 		</location>
-		<location id="id20" x="-356" y="213">
+		<location id="id24" x="-356" y="213">
 			<name x="-407" y="230">avoid_obstacle1</name>
 		</location>
-		<location id="id21" x="-357" y="-280">
+		<location id="id25" x="-357" y="-280">
 			<name x="-416" y="-314">obstacle2_on_path</name>
 		</location>
-		<location id="id22" x="-119" y="-280">
+		<location id="id26" x="-119" y="-280">
 			<name x="-102" y="-288">avoid_obstacle2</name>
 		</location>
-		<init ref="id13"/>
+		<init ref="id17"/>
 		<transition>
-			<source ref="id22"/>
-			<target ref="id16"/>
+			<source ref="id26"/>
+			<target ref="id20"/>
 			<label kind="synchronisation" x="-102" y="-220">move?</label>
-		</transition>
-		<transition>
-			<source ref="id15"/>
-			<target ref="id21"/>
-			<label kind="synchronisation" x="-416" y="-220">move?</label>
-		</transition>
-		<transition>
-			<source ref="id20"/>
-			<target ref="id14"/>
-			<label kind="synchronisation" x="-348" y="136">move?</label>
+			<label kind="assignment" x="-110" y="-204">obstacle = false</label>
 		</transition>
 		<transition>
 			<source ref="id19"/>
-			<target ref="id20"/>
+			<target ref="id25"/>
+			<label kind="guard" x="-467" y="-238">obstacle == true</label>
+			<label kind="synchronisation" x="-416" y="-220">move?</label>
+		</transition>
+		<transition>
+			<source ref="id24"/>
+			<target ref="id18"/>
+			<label kind="synchronisation" x="-348" y="136">move?</label>
+			<label kind="assignment" x="-348" y="153">obstacle = false</label>
+		</transition>
+		<transition>
+			<source ref="id23"/>
+			<target ref="id24"/>
 			<label kind="synchronisation" x="-501" y="187">move?</label>
 		</transition>
 		<transition>
-			<source ref="id13"/>
-			<target ref="id19"/>
+			<source ref="id17"/>
+			<target ref="id23"/>
 			<label kind="guard" x="-722" y="94">obstacle == true</label>
 			<label kind="synchronisation" x="-679" y="111">move?</label>
-			<label kind="assignment" x="-722" y="128">obstacle = false</label>
-		</transition>
-		<transition>
-			<source ref="id17"/>
-			<target ref="id18"/>
-			<label kind="guard" x="-110" y="102">bale_remaining == false</label>
-			<label kind="synchronisation" x="-110" y="119">end_of_track?</label>
-		</transition>
-		<transition>
-			<source ref="id17"/>
-			<target ref="id14"/>
-			<label kind="guard" x="-305" y="26">bale_remaining == true</label>
-			<label kind="synchronisation" x="-305" y="43">continue_to_new_bale?</label>
-		</transition>
-		<transition>
-			<source ref="id16"/>
-			<target ref="id17"/>
-			<label kind="synchronisation" x="-110" y="-50">unload?</label>
-		</transition>
-		<transition>
-			<source ref="id15"/>
-			<target ref="id16"/>
-			<label kind="guard" x="-297" y="-110">obstacle == false</label>
-			<label kind="synchronisation" x="-263" y="-127">move?</label>
-		</transition>
-		<transition>
-			<source ref="id14"/>
-			<target ref="id15"/>
-			<label kind="synchronisation" x="-416" y="-50">pickup?</label>
-		</transition>
-		<transition>
-			<source ref="id13"/>
-			<target ref="id14"/>
-			<label kind="guard" x="-543" y="26">obstacle == false</label>
-			<label kind="synchronisation" x="-509" y="43">move?</label>
 		</transition>
 		<transition>
 			<source ref="id21"/>
 			<target ref="id22"/>
+			<label kind="guard" x="-110" y="102">bale_remaining == false</label>
+			<label kind="synchronisation" x="-110" y="119">end_of_track?</label>
+		</transition>
+		<transition>
+			<source ref="id21"/>
+			<target ref="id18"/>
+			<label kind="guard" x="-305" y="26">bale_remaining == true</label>
+			<label kind="synchronisation" x="-305" y="43">continue_to_new_bale?</label>
+		</transition>
+		<transition>
+			<source ref="id20"/>
+			<target ref="id21"/>
+			<label kind="synchronisation" x="-110" y="-50">unload?</label>
+		</transition>
+		<transition>
+			<source ref="id19"/>
+			<target ref="id20"/>
+			<label kind="guard" x="-297" y="-110">obstacle == false</label>
+			<label kind="synchronisation" x="-263" y="-127">move?</label>
+		</transition>
+		<transition>
+			<source ref="id18"/>
+			<target ref="id19"/>
+			<label kind="synchronisation" x="-416" y="-50">pickup?</label>
+		</transition>
+		<transition>
+			<source ref="id17"/>
+			<target ref="id18"/>
+			<label kind="guard" x="-543" y="26">obstacle == false</label>
+			<label kind="synchronisation" x="-509" y="43">move?</label>
+		</transition>
+		<transition>
+			<source ref="id25"/>
+			<target ref="id26"/>
 			<label kind="synchronisation" x="-246" y="-305">move?</label>
 		</transition>
 	</template>
 	<template>
 		<name>PathTest</name>
-		<location id="id23" x="-594" y="357">
+		<location id="id27" x="-594" y="357">
 			<name x="-645" y="323">street_beginning</name>
 		</location>
-		<location id="id24" x="-339" y="357">
+		<location id="id28" x="-339" y="357">
 			<name x="-416" y="383">move_to_bale_location</name>
 		</location>
-		<location id="id25" x="-339" y="154">
+		<location id="id29" x="-339" y="154">
 			<name x="-458" y="145">pickingup_bale</name>
 		</location>
-		<location id="id26" x="-102" y="154">
+		<location id="id30" x="-102" y="154">
 			<name x="-85" y="145">move_to_desired_location</name>
 		</location>
-		<location id="id27" x="-102" y="357">
+		<location id="id31" x="-102" y="357">
 			<name x="-76" y="340">unloading_bale</name>
 		</location>
-		<location id="id28" x="-102" y="502">
+		<location id="id32" x="-102" y="502">
 			<name x="-136" y="519">end_of_grid</name>
 		</location>
-		<location id="id29" x="-594" y="502">
+		<location id="id33" x="-594" y="502">
 			<name x="-637" y="519">obstacle1_on_path</name>
 		</location>
-		<location id="id30" x="-339" y="502">
+		<location id="id34" x="-339" y="502">
 			<name x="-390" y="519">avoid_obstacle1</name>
 		</location>
-		<init ref="id23"/>
+		<init ref="id27"/>
 		<transition>
-			<source ref="id30"/>
-			<target ref="id24"/>
-			<label kind="synchronisation" x="-331" y="425">move?</label>
+			<source ref="id34"/>
+			<target ref="id28"/>
+			<label kind="synchronisation" x="-323" y="425">move?</label>
+			<label kind="assignment" x="-331" y="442">obstacle = false</label>
 		</transition>
 		<transition>
-			<source ref="id29"/>
-			<target ref="id30"/>
+			<source ref="id33"/>
+			<target ref="id34"/>
 			<label kind="synchronisation" x="-484" y="476">move?</label>
 		</transition>
 		<transition>
-			<source ref="id23"/>
-			<target ref="id29"/>
+			<source ref="id27"/>
+			<target ref="id33"/>
 			<label kind="guard" x="-705" y="383">obstacle == true</label>
 			<label kind="synchronisation" x="-662" y="400">move?</label>
-			<label kind="assignment" x="-705" y="417">obstacle = false</label>
 		</transition>
 		<transition>
-			<source ref="id27"/>
-			<target ref="id28"/>
+			<source ref="id31"/>
+			<target ref="id32"/>
 			<label kind="guard" x="-93" y="391">bale_remaining == false</label>
 			<label kind="synchronisation" x="-93" y="408">end_of_track?</label>
 		</transition>
 		<transition>
-			<source ref="id27"/>
-			<target ref="id24"/>
+			<source ref="id31"/>
+			<target ref="id28"/>
 			<label kind="guard" x="-288" y="315">bale_remaining == true</label>
 			<label kind="synchronisation" x="-288" y="332">continue_to_new_bale?</label>
 		</transition>
 		<transition>
-			<source ref="id26"/>
-			<target ref="id27"/>
+			<source ref="id30"/>
+			<target ref="id31"/>
 			<label kind="synchronisation" x="-93" y="239">unload?</label>
 		</transition>
 		<transition>
-			<source ref="id25"/>
-			<target ref="id26"/>
+			<source ref="id29"/>
+			<target ref="id30"/>
 			<label kind="guard" x="-280" y="179">obstacle == false</label>
 			<label kind="synchronisation" x="-246" y="162">move?</label>
 		</transition>
 		<transition>
-			<source ref="id24"/>
-			<target ref="id25"/>
+			<source ref="id28"/>
+			<target ref="id29"/>
 			<label kind="synchronisation" x="-399" y="239">pickup?</label>
 		</transition>
 		<transition>
-			<source ref="id23"/>
-			<target ref="id24"/>
+			<source ref="id27"/>
+			<target ref="id28"/>
 			<label kind="guard" x="-526" y="315">obstacle == false</label>
 			<label kind="synchronisation" x="-492" y="332">move?</label>
 		</transition>
@@ -320,19 +370,19 @@ car4 = Car();
 //track3 = Lane();
 //track4 = Lane();
 
-//Path1 = Path();
-//Path2 = Path();
-//Path3 = Path();
-//Path4 = Path();
+Path1 = Path();
+Path2 = Path();
+Path3 = Path();
+Path4 = Path();
 
-PathTest1 = PathTest();
-PathTest2 = PathTest();
-PathTest3 = PathTest();
-PathTest4 = PathTest();
+//PathTest1 = PathTest();
+//PathTest2 = PathTest();
+//PathTest3 = PathTest();
+//PathTest4 = PathTest();
 // List one or more processes to be composed into a system.
 //system car1, car2, car3, car4, track1, track2, track3, track4;
-//system car1, car2, car3, car4, Path1, Path2, Path3, Path4;
-system car1, car2, car3, car4,PathTest1, PathTest2, PathTest3, PathTest4;
+system car1, car2, car3, car4, Path1, Path2, Path3, Path4;
+//system car1, car2, car3, car4,PathTest1, PathTest2, PathTest3, PathTest4;
 
     </system>
 	<queries>
