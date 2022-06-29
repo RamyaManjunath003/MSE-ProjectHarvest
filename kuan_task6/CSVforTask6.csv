@@ -1,0 +1,5 @@
+﻿car,energy_consumption,weight,speed,capacity,multiple_roles,durability,central_manager
+small_truck,less,light,fast,small,yes,long,yes
+medium_truck,medium,medium,medium,big,no,long,no
+large_truck,more,heavy,slow,big,yes,short,no
+weed_truck,less,medium,fast,big,no,long,no
