@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+const int N = 4; //No. of Bale vehicles
+typedef int[0,N-1] id_t;
+
+chan DisconnectSuccess[N];
+chan ConnectionReq[N];
+chan DisconnectReq[N];
+urgent chan ConnectionSuccess[N];
+chan RetryReq[N];
+chan Approved[N];
+chan Networkfailure[N];</declaration>
+	<template>
+		<name x="5" y="5">VehClient</name>
+		<parameter>const id_t id</parameter>
+		<declaration>// Place local declarations here.
+clock x;</declaration>
+		<location id="id0" x="-59" y="-204">
+			<name x="-69" y="-238">Init</name>
+		</location>
+		<location id="id1" x="-161" y="-110">
+			<name x="-238" y="-135">Connecting</name>
+		</location>
+		<location id="id2" x="42" y="-110">
+			<name x="32" y="-144">Disconnect</name>
+		</location>
+		<location id="id3" x="-68" y="-17">
+			<name x="-153" y="-17">Connected</name>
+		</location>
+		<location id="id4" x="-68" y="68">
+			<name x="-85" y="85">Failure</name>
+		</location>
+		<location id="id5" x="-297" y="68">
+			<name x="-314" y="85">Retry</name>
+		</location>
+		<init ref="id0"/>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-279" y="-221">Approved[id]?</label>
+			<nail x="-297" y="-204"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id5"/>
+			<label kind="synchronisation" x="-229" y="68">RetryReq[id]!</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="-68" y="8">Networkfailure[id]?</label>
+			<label kind="assignment" x="-68" y="25">x=0</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-8" y="-178">DisconnectSuccess[id]?</label>
+			<label kind="assignment" x="25" y="-161">x = 0</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id2"/>
+			<label kind="guard" x="0" y="-68">x==50</label>
+			<label kind="synchronisation" x="-25" y="-51">DisconnectReq[id]!</label>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-255" y="-76">ConnectionSuccess[id]?</label>
+			<label kind="assignment" x="-144" y="-59">x=0</label>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-195" y="-187">ConnectionReq[id]!</label>
+		</transition>
+	</template>
+	<template>
+		<name>Server</name>
+		<declaration>id_t list[N+1];</declaration>
+		<location id="id6" x="-25" y="-119">
+			<name x="-76" y="-144">Ready</name>
+		</location>
+		<location id="id7" x="-17" y="102">
+			<name x="-34" y="110">Busy</name>
+		</location>
+		<location id="id8" x="187" y="-119">
+			<name x="187" y="-110">ServerDown</name>
+		</location>
+		<location id="id9" x="187" y="-221">
+			<name x="177" y="-255">ServerUp</name>
+		</location>
+		<init ref="id6"/>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id6"/>
+			<label kind="select" x="-8" y="-255">e:id_t</label>
+			<label kind="synchronisation" x="-7" y="-238">Approved[e]!</label>
+			<nail x="-25" y="-221"/>
+			<nail x="-25" y="-136"/>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id9"/>
+			<label kind="select" x="187" y="-187">e:id_t</label>
+			<label kind="synchronisation" x="186" y="-174">RetryReq[e]?</label>
+			<nail x="178" y="-144"/>
+			<nail x="178" y="-170"/>
+			<nail x="187" y="-195"/>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id8"/>
+			<label kind="select" x="59" y="-119">e:id_t</label>
+			<label kind="synchronisation" x="59" y="-102">Networkfailure[e]!</label>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id7"/>
+			<label kind="select" x="-110" y="-51">e:id_t</label>
+			<label kind="synchronisation" x="-136" y="-34">DisconnectReq[e]?</label>
+			<nail x="-144" y="-25"/>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id6"/>
+			<label kind="select" x="42" y="-25">e:id_t</label>
+			<label kind="synchronisation" x="-8" y="-8">DisconnectSuccess[e]!</label>
+			<nail x="102" y="-17"/>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id6"/>
+			<label kind="select" x="127" y="17">e:id_t</label>
+			<label kind="synchronisation" x="102" y="34">ConnectionSuccess[e]!</label>
+			<nail x="187" y="-17"/>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id7"/>
+			<label kind="select" x="-221" y="-68">e:id_t</label>
+			<label kind="synchronisation" x="-306" y="-51">ConnectionReq[e]?</label>
+			<nail x="-221" y="-25"/>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+//Process = Template();
+// List one or more processes to be composed into a system.
+system VehClient, Server;
+    </system>
+	<queries>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>
