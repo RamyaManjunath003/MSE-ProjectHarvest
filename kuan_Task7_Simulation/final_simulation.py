@@ -1,16 +1,3 @@
-# This project is all done by chun-kuan chih
-# -----------------------------
-# 蟲蟲1 large bale 2 0 -> 2 3, 2 2 的時候就會斷掉
-# 蟲蟲2 新增mid bale的時候會讓scp mcp同時開始跑
-# 未解1 車子避開對方
-# 更新 0705 把pop放在carrybales
-# 除了carrybales的pop 全部comment 未刪除 可以刪除
-# -----------------------------
-# 先輸入 0 0 4 觀察路徑
-# 再輸入 3 1 5 新增障礙物
-# 再輸入 0 0 4 觀察路徑
-# 會發現這次路徑會避開 3 1 這個位置了
-# ------------------------------
 import numpy as np
 import random
 import time
@@ -20,8 +7,12 @@ from threading import Lock
 
 start = time.perf_counter()
 
+### Below two cells are the final simulation field
+
+### Now I am using simplified verison of field to test the algo
+
 # open file and store in the matrix-
-with open('fieldtesting.txt', 'r') as file:
+with open('field.txt', 'r') as file:
     data = file.read()  # str object
 
 # replace all the space and new line
@@ -36,11 +27,13 @@ for i in range(0, 6):
     for j in range(0, 14):
         kuan[i][j] = int(data[count])
         count += 1
+kuan
 
 kuan_str = [[0] * 14 for i in range(6)]
 for i in range(0, 6):
     for j in range(0, 14):
         kuan_str[i][j] = str(kuan[i][j])
+kuan_str
 
 # global variable
 # small
@@ -68,6 +61,8 @@ abx = -1
 aby = -1
 bn = -1
 
+step = 0
+
 small_field = [[0] * 14 for i in range(6)]
 mid_field = [[0] * 14 for i in range(6)]
 large_field = [[0] * 14 for i in range(6)]
@@ -81,10 +76,10 @@ for i in range(0, 6):
 
 
 # Main
-small_start_x, small_start_y, small_final_x, small_final_y = 0, 0, 0, 3
-mid_start_x, mid_start_y, mid_final_x, mid_final_y = 1, 0, 1, 3
-large_start_x, large_start_y, large_final_x, large_final_y = 2, 0, 2, 3
-weed_start_x, weed_start_y, weed_final_x, weed_final_y = 3, 0, 3, 3
+small_start_x, small_start_y, small_final_x, small_final_y = 3, 3, 1, 12
+mid_start_x, mid_start_y, mid_final_x, mid_final_y = 3, 12, 1, 6
+large_start_x, large_start_y, large_final_x, large_final_y = 5, 11, 5, 2
+weed_start_x, weed_start_y, weed_final_x, weed_final_y = 1, 13, 2, 4
 
 slc = [[-1, -1], [-1, -1]]
 mlc = [[-1, -1], [-1, -1]]
@@ -97,6 +92,9 @@ lcp = [[large_start_x], [large_start_y]]
 wcp = [[weed_start_x], [weed_start_y]]
 
 no = False
+
+small_finished = False
+mid_finished = False
 
 #### only calculate the shortest path number, give 1 in the end
 
@@ -316,122 +314,227 @@ def weed_backtrackpath(finalx, finaly, total_step):
 
 
 ### carry the bales, give 0 if carried
-def carrybales(which_bale, lock, *bales):
+def carrybales1(which_bale, bale1x, bale1y, lock, *bales):
     global scp, mcp, lcp, wcp, no
     if which_bale == 'small':
-        count = 0
         for i in range(len(bales[0])):
+            
             lock.acquire()
             if no == True:
                 return -1
             scp = [bales[0][i][0]], [bales[0][i][1]]
-            if kuan[bales[0][i][0]][bales[0][i][1]] == 1 and count < 3:
-                sbl.pop(sbl.index([bales[0][i][0], bales[0][i][1]]))
+            if kuan[bales[0][i][0]][bales[0][i][1]] == 1 and bales[0][i][0] == bale1x and bales[0][i][1] == bale1y:
                 kuan[bales[0][i][0]][bales[0][i][1]] = 0
-                count += 1
                 print('scp\t', scp, '\tsmall carried!')
             else:
                 print('scp\t', scp)
             lock.release()
             time.sleep(0.1)
     elif which_bale == 'mid':
-        count = 0
         for i in range(len(bales[0])):
+            
             lock.acquire()
             if no == True:
                 return -1
             mcp = [bales[0][i][0]], [bales[0][i][1]]
-            if kuan[bales[0][i][0]][bales[0][i][1]] == 2 and count < 2:
-                # mbl.pop(mbl.index([bales[0][i][0], bales[0][i][1]]))
+            if kuan[bales[0][i][0]][bales[0][i][1]] == 2 and bales[0][i][0] == bale1x and bales[0][i][1] == bale1y:
                 kuan[bales[0][i][0]][bales[0][i][1]] = 0
-                count += 1
                 print('mcp\t', mcp, '\tmid carried!')
             else:
                 print('mcp\t', mcp)
             lock.release()
             time.sleep(0.1)
     elif which_bale == 'large':
-        count = 0
         for i in range(len(bales[0])):
+            
             lock.acquire()
             if no == True:
                 return -1
             lcp = [bales[0][i][0]], [bales[0][i][1]]
-            if kuan[bales[0][i][0]][bales[0][i][1]] == 3 and count < 2:
-                lbl.pop(lbl.index([bales[0][i][0], bales[0][i][1]]))
+            if kuan[bales[0][i][0]][bales[0][i][1]] == 3 and bales[0][i][0] == bale1x and bales[0][i][1] == bale1y:
                 kuan[bales[0][i][0]][bales[0][i][1]] = 0
-                count += 1
                 print('lcp\t', lcp, '\tlarge carried!')
             else:
                 print('lcp\t', lcp)
             lock.release()
             time.sleep(0.1)
     elif which_bale == 'weed':
-        count = 0
         for i in range(len(bales[0])):
+            
             lock.acquire()
             if no == True:
                 return -1
             wcp = [bales[0][i][0]], [bales[0][i][1]]
-            if kuan[bales[0][i][0]][bales[0][i][1]] == 4 and count < 1:
+            if kuan[bales[0][i][0]][bales[0][i][1]] == 4 and bales[0][i][0] == bale1x and bales[0][i][1] == bale1y:
                 wbl.pop(wbl.index([bales[0][i][0], bales[0][i][1]]))
                 kuan[bales[0][i][0]][bales[0][i][1]] = 0
-                count += 1
                 print('wcp\t', wcp, '\tweed carried')
             else:
                 print('wcp\t', wcp)
             lock.release()
             time.sleep(0.1)
     elif which_bale == 'small_mid':
-        count = 0
         for i in range(len(bales[0])):
+            
             lock.acquire()
             if no == True:
                 return -1
             scp = [bales[0][i][0]], [bales[0][i][1]]
-            if kuan[bales[0][i][0]][bales[0][i][1]] == 2 and count < 1:
-                mbl.pop(mbl.index([bales[0][i][0], bales[0][i][1]]))
+            if kuan[bales[0][i][0]][bales[0][i][1]] == 2 and bales[0][i][0] == bale1x and bales[0][i][1] == bale1y:
                 kuan[bales[0][i][0]][bales[0][i][1]] = 0
-                count += 1
                 print('scp\t', scp, '\tmid carried!\t(small)')
             else:
                 print('scp\t', scp)
             lock.release()
             time.sleep(0.1)
     elif which_bale == 'large_small':
-        count = 0
         for i in range(len(bales[0])):
+            
             lock.acquire()
             if no == True:
                 return -1
             lcp = [bales[0][i][0]], [bales[0][i][1]]
-            if kuan[bales[0][i][0]][bales[0][i][1]] == 1 and count < 2:
-                sbl.pop(sbl.index([bales[0][i][0], bales[0][i][1]]))
+            if kuan[bales[0][i][0]][bales[0][i][1]] == 1 and bales[0][i][0] == bale1x and bales[0][i][1] == bale1y:
                 kuan[bales[0][i][0]][bales[0][i][1]] = 0
-                count += 1
                 print('lcp\t', lcp, '\tsmall carried!')
             else:
                 print('lcp\t', lcp)
             lock.release()
             time.sleep(0.1)
     elif which_bale == 'large_mid':
-        count = 0
         for i in range(len(bales[0])):
+            
             lock.acquire()
             if no == True:
                 return -1
             lcp = [bales[0][i][0]], [bales[0][i][1]]
-            if kuan[bales[0][i][0]][bales[0][i][1]] == 2 and count < 1:
-                mbl.pop(mbl.index([bales[0][i][0], bales[0][i][1]]))
+            if kuan[bales[0][i][0]][bales[0][i][1]] == 2 and bales[0][i][0] == bale1x and bales[0][i][1] == bale1y:
                 kuan[bales[0][i][0]][bales[0][i][1]] = 0
-                count += 1
                 print('lcp\t', lcp, '\tmid carried!')
             else:
                 print('lcp\t', lcp)
             lock.release()
             time.sleep(0.1)
 
-### How many bales are in the field
+def carrybales2(which_bale, bale1x, bale1y, bale2x, bale2y, lock, *bales):
+    global scp, mcp, lcp, wcp, no
+    if which_bale == 'small':
+        for i in range(len(bales[0])):
+            
+            lock.acquire()
+            if no == True:
+                return -1
+            scp = [bales[0][i][0]], [bales[0][i][1]]
+            if kuan[bales[0][i][0]][bales[0][i][1]] == 1 and ((bales[0][i][0] == bale1x and bales[0][i][1] == bale1y) or (bales[0][i][0] == bale2x and bales[0][i][1] == bale2y)):
+                kuan[bales[0][i][0]][bales[0][i][1]] = 0
+                print('scp\t', scp, '\tsmall carried!')
+            else:
+                print('scp\t', scp)
+            lock.release()
+            time.sleep(0.1)
+    elif which_bale == 'mid':
+        for i in range(len(bales[0])):
+            
+            lock.acquire()
+            if no == True:
+                return -1
+            mcp = [bales[0][i][0]], [bales[0][i][1]]
+            if kuan[bales[0][i][0]][bales[0][i][1]] == 2 and ((bales[0][i][0] == bale1x and bales[0][i][1] == bale1y) or (bales[0][i][0] == bale2x and bales[0][i][1] == bale2y)):
+                kuan[bales[0][i][0]][bales[0][i][1]] = 0
+                print('mcp\t', mcp, '\tmid carried!')
+            else:
+                print('mcp\t', mcp)
+            lock.release()
+            time.sleep(0.1)
+    elif which_bale == 'large':
+        for i in range(len(bales[0])):
+            
+            lock.acquire()
+            if no == True:
+                return -1
+            lcp = [bales[0][i][0]], [bales[0][i][1]]
+            if kuan[bales[0][i][0]][bales[0][i][1]] == 3 and ((bales[0][i][0] == bale1x and bales[0][i][1] == bale1y) or (bales[0][i][0] == bale2x and bales[0][i][1] == bale2y)):
+                kuan[bales[0][i][0]][bales[0][i][1]] = 0
+                print('lcp\t', lcp, '\tlarge carried!')
+            else:
+                print('lcp\t', lcp)
+            lock.release()
+            time.sleep(0.1)
+    elif which_bale == 'weed':
+        for i in range(len(bales[0])):
+            
+            lock.acquire()
+            if no == True:
+                return -1
+            wcp = [bales[0][i][0]], [bales[0][i][1]]
+            if kuan[bales[0][i][0]][bales[0][i][1]] == 4 and ((bales[0][i][0] == bale1x and bales[0][i][1] == bale1y) or (bales[0][i][0] == bale2x and bales[0][i][1] == bale2y)):
+                wbl.pop(wbl.index([bales[0][i][0], bales[0][i][1]]))
+                kuan[bales[0][i][0]][bales[0][i][1]] = 0
+                print('wcp\t', wcp, '\tweed carried')
+            else:
+                print('wcp\t', wcp)
+            lock.release()
+            time.sleep(0.1)
+    elif which_bale == 'small_mid':
+        for i in range(len(bales[0])):
+            
+            lock.acquire()
+            if no == True:
+                return -1
+            scp = [bales[0][i][0]], [bales[0][i][1]]
+            if kuan[bales[0][i][0]][bales[0][i][1]] == 2 and ((bales[0][i][0] == bale1x and bales[0][i][1] == bale1y) or (bales[0][i][0] == bale2x and bales[0][i][1] == bale2y)):
+                kuan[bales[0][i][0]][bales[0][i][1]] = 0
+                print('scp\t', scp, '\tmid carried!\t(small)')
+            else:
+                print('scp\t', scp)
+            lock.release()
+            time.sleep(0.1)
+    elif which_bale == 'large_small':
+        for i in range(len(bales[0])):
+            
+            lock.acquire()
+            if no == True:
+                return -1
+            lcp = [bales[0][i][0]], [bales[0][i][1]]
+            if kuan[bales[0][i][0]][bales[0][i][1]] == 1 and ((bales[0][i][0] == bale1x and bales[0][i][1] == bale1y) or (bales[0][i][0] == bale2x and bales[0][i][1] == bale2y)):
+                kuan[bales[0][i][0]][bales[0][i][1]] = 0
+                print('lcp\t', lcp, '\tsmall carried!')
+            else:
+                print('lcp\t', lcp)
+            lock.release()
+            time.sleep(0.1)
+    elif which_bale == 'large_mid':
+        for i in range(len(bales[0])):
+            
+            lock.acquire()
+            if no == True:
+                return -1
+            lcp = [bales[0][i][0]], [bales[0][i][1]]
+            if kuan[bales[0][i][0]][bales[0][i][1]] == 2 and ((bales[0][i][0] == bale1x and bales[0][i][1] == bale1y) or (bales[0][i][0] == bale2x and bales[0][i][1] == bale2y)):
+                kuan[bales[0][i][0]][bales[0][i][1]] = 0
+                print('lcp\t', lcp, '\tmid carried!')
+            else:
+                print('lcp\t', lcp)
+            lock.release()
+            time.sleep(0.1)
+
+def carrybales3(which_bale, bale1x, bale1y, bale2x, bale2y, bale3x, bale3y, lock, *bales):
+    global scp, mcp, lcp, wcp, no
+    if which_bale == 'small':
+        for i in range(len(bales[0])):
+            
+            lock.acquire()
+            if no == True:
+                return -1
+            scp = [bales[0][i][0]], [bales[0][i][1]]
+            if kuan[bales[0][i][0]][bales[0][i][1]] == 1 and ((bales[0][i][0] == bale1x and bales[0][i][1] == bale1y) or (bales[0][i][0] == bale2x and bales[0][i][1] == bale2y) or (bales[0][i][0] == bale3x and bales[0][i][1] == bale3y)):
+                kuan[bales[0][i][0]][bales[0][i][1]] = 0
+                print('scp\t', scp, '\tsmall carried!')
+            else:
+                print('scp\t', scp)
+            lock.release()
+            time.sleep(0.1)
+
 
 
 ### Store the bales' location in each list
@@ -494,76 +597,20 @@ def nearthefurthest(farawaybalex, farawaybaley, number, *bales):
             kuantable.append([distance, bales[0][i][0], bales[0][i][1]])
         kuantable.sort()  # the shortest will be the first
         return kuantable[0][1], kuantable[0][2], kuantable[1][1], kuantable[1][2]  # return the nearset two bales x y
-
-
-def starttobales(startx, starty, *threebales):
-    kuantable = []
-    total = len(threebales[0])
-    for i in range(total):
-        distance = small_obstaclepathsimple(kuan, startx, starty, threebales[0][i][0], threebales[0][i][1], 1)
-        kuantable.append([distance, threebales[0][i][0], threebales[0][i][1]])
-    kuantable.sort()
-    return kuantable
-
-
-def threebales(small_bale_number, collectionx, collectiony):
-    if small_bale_number >= 3:
-        buffer = []
-        bale1x, bale1y = furthestbale(collectionx, collectiony, sbl)  # find the furthest bale and get the location
-        buffer.append([bale1x, bale1y])
-        # sbl.pop(sbl.index([bale1x, bale1y]))  # remove the furthest bale from sbl
-        bale2x, bale2y, bale3x, bale3y = nearthefurthest(bale1x, bale1y,
-                                                         2, sbl)  # find the closest 2 bales to the furthest bale
-        buffer.append([bale2x, bale2y])
-        # sbl.pop(sbl.index([bale2x, bale2y]))
-        buffer.append([bale3x, bale3y])
-        # sbl.pop(sbl.index([bale3x, bale3y]))
-        return buffer
-    else:
-        if small_bale_number == 1:
-            buffer = []
-            bale1x, bale1y = furthestbale(collectionx, collectiony,
-                                          sbl)  # find the furthest bale and get the location
-            buffer.append([bale1x, bale1y])
-            # sbl.pop(sbl.index([bale1x, bale1y]))  # remove the furthest bale from sbl
-            return buffer
-        elif small_bale_number == 2:
-            buffer = []
-            bale1x, bale1y = furthestbale(collectionx, collectiony,
-                                          sbl)  # find the furthest bale and get the location
-            buffer.append([bale1x, bale1y])
-            # sbl.pop(sbl.index([bale1x, bale1y]))  # remove the furthest bale from sbl
-            bale2x, bale2y, = nearthefurthest(bale1x, bale1y, 1,
-                                              sbl)  # find the closest 2 bales to the furthest bale
-            buffer.append([bale2x, bale2y])
-            # sbl.pop(sbl.index([bale2x, bale2y]))
-            return buffer
-
-
-def twobalesmid(mid_bale_number, collectionx, collectiony):
-    if mid_bale_number == 1:  # if only 1 bale remaining
-        buffer = []
-        # find the furthest bale and get the location
-        bale1x, bale1y = furthestbale(collectionx, collectiony, mbl)
-        buffer.append([bale1x, bale1y])  # add it to the buffer
-        # mbl(mbl.index([bale1x, bale1y]))  # remove the furthest bale from mbl
-        return buffer  # return the furthest bale
-    elif mid_bale_number == 2:
-        buffer = []
-        # find the furthest bale and get the location
-        bale1x, bale1y = furthestbale(collectionx, collectiony, mbl)
-        buffer.append([bale1x, bale1y])  # add it to the buffer
-        # mbl(mbl.index([bale1x, bale1y]))  # remove the furthest bale from mbl
-        # find the nearest bales to the furthest bale
-        bale2x, bale2y, = nearthefurthest(bale1x, bale1y, 1, mbl)
-        buffer.append([bale2x, bale2y])
-        # mbl(mbl.index([bale2x, bale2y]))
-        return buffer  # return furhtest bale and the nearest bale to it
+    elif number == 3:
+        kuantable = []  # empty list, for storing each bale distance to the collection
+        total = len(bales[0])  # how many bales from the input list?
+        # calculate the distance and store in the list, distance, x, y
+        for i in range(total):
+            distance = small_obstaclepathsimple(kuan, farawaybalex, farawaybaley, bales[0][i][0], bales[0][i][1], 1)
+            kuantable.append([distance, bales[0][i][0], bales[0][i][1]])
+        kuantable.sort()  # the shortest will be the first
+        return kuantable[0][1], kuantable[0][2], kuantable[1][1], kuantable[1][2], kuantable[2][1], kuantable[2][2]  # return the nearset two bales x y
 
 
 #### Small truck: 3 small / 1 mid
 def small_bale(grid, start_x, start_y, final_x, final_y, collection_midx, collection_midy, flag, slock, mlock, lock):
-    global no
+    global no, small_finished, step
     print('start small')
     baleslocation('small')  # show all bales location, store in sbl
     print('small bales\t', sbl)
@@ -582,30 +629,16 @@ def small_bale(grid, start_x, start_y, final_x, final_y, collection_midx, collec
             if small_bale_number >= 3:  # > 3
                 buffer = []
                 small_each = []
-                threebaleslocation = threebales(small_bale_number, final_x, final_y)
-                buffer = starttobales(start_x, start_y, threebaleslocation)
-                if small_obstaclepathsimple(grid, buffer[0][1], buffer[0][2], buffer[1][1], buffer[1][2],
-                                            1) + small_obstaclepathsimple(grid, buffer[1][1], buffer[1][2],
-                                                                          buffer[2][1], buffer[2][2],
-                                                                          1) + small_obstaclepathsimple(grid,
-                                                                                                        buffer[2][
-                                                                                                            1],
-                                                                                                        buffer[2][
-                                                                                                            2],
-                                                                                                        final_x,
-                                                                                                        final_y,
-                                                                                                        1) > small_obstaclepathsimple(
-                    grid, buffer[0][1], buffer[0][2], buffer[2][1], buffer[2][2], 1) + small_obstaclepathsimple(
-                    grid, buffer[2][1], buffer[2][2], buffer[1][1], buffer[1][2], 1) + small_obstaclepathsimple(
-                    grid, buffer[1][1], buffer[1][2], final_x, final_y, 1):
-                    threebaleslocation = [[buffer[0][1], buffer[0][2]], [buffer[2][1], buffer[2][2]],
-                                          [buffer[1][1], buffer[1][2]]]
-                # start to first bale
-                print('qweqweqweqweqwe', scp[0][0], scp[1][0])
-                ssd = small_obstaclepathsimple(grid, scp[0][0], scp[1][0], threebaleslocation[0][0],
-                                               threebaleslocation[0][1], flag)
+                slock.acquire()
+                bale1x, bale1y, bale2x, bale2y, bale3x, bale3y = nearthefurthest(start_x, start_y, 3, sbl)
+                sbl.pop(sbl.index([bale1x, bale1y]))
+                sbl.pop(sbl.index([bale2x, bale2y]))
+                sbl.pop(sbl.index([bale3x, bale3y]))
+                slock.release()
+                time.sleep(0.1)
+                ssd = small_obstaclepathsimple(grid, scp[0][0], scp[1][0], bale1x, bale1y, flag)
                 if ssd != -1:
-                    small_backtrackpath(threebaleslocation[0][0], threebaleslocation[0][1], ssd)
+                    small_backtrackpath(bale1x, bale1y, ssd)
                 # # print(c)
                 for i in range(len(c)):
                     small.append([c[i][0], c[i][1]])
@@ -614,10 +647,9 @@ def small_bale(grid, start_x, start_y, final_x, final_y, collection_midx, collec
                 c.clear()
                 b.clear()
                 # first bale to second bale
-                ssd = small_obstaclepathsimple(grid, threebaleslocation[0][0], threebaleslocation[0][1],
-                                               threebaleslocation[1][0], threebaleslocation[1][1], flag)
+                ssd = small_obstaclepathsimple(grid, bale1x, bale1y, bale2x, bale2y, flag)
                 if ssd != -1:
-                    small_backtrackpath(threebaleslocation[1][0], threebaleslocation[1][1], ssd)
+                    small_backtrackpath(bale2x, bale2y, ssd)
                 # # print(c)
                 for i in range(1, len(c)):
                     small.append([c[i][0], c[i][1]])
@@ -626,11 +658,9 @@ def small_bale(grid, start_x, start_y, final_x, final_y, collection_midx, collec
                 c.clear()
                 b.clear()
                 # second bale to third bale
-                ssd = small_obstaclepathsimple(grid, threebaleslocation[1][0], threebaleslocation[1][1],
-                                               threebaleslocation[2][0],
-                                               threebaleslocation[2][1], flag)
+                ssd = small_obstaclepathsimple(grid, bale2x, bale2y,bale3x, bale3y, flag)
                 if ssd != -1:
-                    small_backtrackpath(threebaleslocation[2][0], threebaleslocation[2][1], ssd)
+                    small_backtrackpath(bale3x, bale3y, ssd)
                 # # print(c)
                 for i in range(1, len(c)):
                     small.append([c[i][0], c[i][1]])
@@ -639,8 +669,7 @@ def small_bale(grid, start_x, start_y, final_x, final_y, collection_midx, collec
                 c.clear()
                 b.clear()
                 # third bale to collection center
-                ssd = small_obstaclepathsimple(grid, threebaleslocation[2][0], threebaleslocation[2][1], final_x,
-                                               final_y, flag)
+                ssd = small_obstaclepathsimple(grid, bale3x, bale3y, final_x, final_y, flag)
                 if ssd != -1:
                     small_backtrackpath(final_x, final_y, ssd)
                 # # print(c)
@@ -651,21 +680,31 @@ def small_bale(grid, start_x, start_y, final_x, final_y, collection_midx, collec
                 c.clear()
                 b.clear()
                 # carry the bales
-                carrybales('small', lock, small_each)
+                carrybales3('small', bale1x, bale1y, bale2x, bale2y, bale3x, bale3y,lock, small_each)
+                l = len(small_each) - 1
+                step += l
                 no = False
                 # update the small bales number
-                print('small path , carry 3 bales', small_each)
+                slock.acquire()
+                small_bale_number = len(sbl)
+                slock.release()
+                time.sleep(0.1)
+                print('small path from small start, carry 3 bales', small_each)
                 # # print(threebaleslocation)
                 # # print('asdasd', small_each)
             elif small_bale_number == 2:
                 buffer = []
                 small_each = []
-                threebaleslocation = threebales(small_bale_number, final_x, final_y)
+                slock.acquire()
+                bale1x, bale1y, bale2x, bale2y = nearthefurthest(start_x, start_y, 2, sbl)
+                sbl.pop(sbl.index([bale1x, bale1y]))
+                sbl.pop(sbl.index([bale2x, bale2y]))
+                slock.release()
+                time.sleep(0.1)
                 # start to first bale
-                ssd = small_obstaclepathsimple(grid, scp[0][0], scp[1][0], threebaleslocation[0][0],
-                                               threebaleslocation[0][1], flag)
+                ssd = small_obstaclepathsimple(grid, scp[0][0], scp[1][0], bale1x, bale1y, flag)
                 if ssd != -1:
-                    small_backtrackpath(threebaleslocation[0][0], threebaleslocation[0][1], ssd)
+                    small_backtrackpath(bale1x, bale1y, ssd)
                 # # print(c)
                 for i in range(len(c)):
                     small.append([c[i][0], c[i][1]])
@@ -674,10 +713,9 @@ def small_bale(grid, start_x, start_y, final_x, final_y, collection_midx, collec
                 c.clear()
                 b.clear()
                 # first bale to second bale
-                ssd = small_obstaclepathsimple(grid, threebaleslocation[0][0], threebaleslocation[0][1],
-                                               threebaleslocation[1][0], threebaleslocation[1][1], flag)
+                ssd = small_obstaclepathsimple(grid, bale1x, bale1y, bale2x, bale2y, flag)
                 if ssd != -1:
-                    small_backtrackpath(threebaleslocation[1][0], threebaleslocation[1][1], ssd)
+                    small_backtrackpath(bale2x, bale2y, ssd)
                 # # print(c)
                 for i in range(1, len(c)):
                     small.append([c[i][0], c[i][1]])
@@ -686,7 +724,7 @@ def small_bale(grid, start_x, start_y, final_x, final_y, collection_midx, collec
                 c.clear()
                 b.clear()
                 # second bale to collection center
-                ssd = small_obstaclepathsimple(grid, threebaleslocation[1][0], threebaleslocation[1][1], final_x,
+                ssd = small_obstaclepathsimple(grid, bale2x, bale2y, final_x,
                                                final_y, flag)
                 if ssd != -1:
                     small_backtrackpath(final_x, final_y, ssd)
@@ -698,21 +736,28 @@ def small_bale(grid, start_x, start_y, final_x, final_y, collection_midx, collec
                 c.clear()
                 b.clear()
                 # carry the bales
-                carrybales('small', lock, small_each)
+                carrybales2('small', bale1x, bale1y, bale2x, bale2y, lock, small_each)
+                l = len(small_each) - 1
+                step += l
                 no = False
                 # update the small bales number
-                print('small path , carry 2 bales', small_each)
-                # # print(threebaleslocation)
-                # # print('qweqwe', small_each)
+                slock.acquire()
+                small_bale_number = len(sbl)
+                slock.release()
+                time.sleep(0.1)
+                print('small path from small start, carry 2 bales', small_each)
             elif small_bale_number == 1:
                 buffer = []
                 small_each = []
-                threebaleslocation = threebales(small_bale_number, final_x, final_y)
+                slock.acquire()
+                bale1x, bale1y = nearthefurthest(start_x, start_y, 1, sbl)
+                sbl.pop(sbl.index([bale1x, bale1y]))
+                slock.release()
+                time.sleep(0.1)
                 # start to first bale
-                ssd = small_obstaclepathsimple(grid, scp[0][0], scp[1][0], threebaleslocation[0][0],
-                                               threebaleslocation[0][1], flag)
+                ssd = small_obstaclepathsimple(grid, scp[0][0], scp[1][0], bale1x, bale1y, flag)
                 if ssd != -1:
-                    small_backtrackpath(threebaleslocation[0][0], threebaleslocation[0][1], ssd)
+                    small_backtrackpath(bale1x, bale1y, ssd)
                 # # print(c)
                 for i in range(len(c)):
                     small.append([c[i][0], c[i][1]])
@@ -721,8 +766,7 @@ def small_bale(grid, start_x, start_y, final_x, final_y, collection_midx, collec
                 c.clear()
                 b.clear()
                 # second bale to collection center
-                ssd = small_obstaclepathsimple(grid, threebaleslocation[0][0], threebaleslocation[0][1], final_x,
-                                               final_y, flag)
+                ssd = small_obstaclepathsimple(grid, bale1x, bale1y, final_x,final_y, flag)
                 if ssd != -1:
                     small_backtrackpath(final_x, final_y, ssd)
                 # # print(c)
@@ -733,67 +777,70 @@ def small_bale(grid, start_x, start_y, final_x, final_y, collection_midx, collec
                 c.clear()
                 b.clear()
                 # carry the bales
-                carrybales('small', lock, small_each)
+                carrybales1('small', bale1x, bale1y, lock, small_each)
+                l = len(small_each) - 1
+                step += l
                 no = False
                 # update the small bales number
-                print('small path , carry 1 bale', small_each)
-                # # print(threebaleslocation)
-                # # print('zxczxc', small_each)
-            time.sleep(0.1)
-            small_bale_number = len(sbl)
-        baleslocation('small')
+                slock.acquire()
+                small_bale_number = len(sbl)
+                slock.release()
+                time.sleep(0.1)
+                print('small path from small start, carry 1 bale', small_each)
 
         # mid bale
-        mid_bale_number = len(mbl)
-        while mid_bale_number != 0:
-            small_mid_each = []
-            # # print('\nmid remaining number', mid_bale_number)
-            # find the nearest bale location and store in the variable
-            # # print('mbl before', mbl)
-            # distance, x, y
-            # show all the bales location with how many steps
-            bale1x, bale1y = nearthefurthest(collection_midx, collection_midy, 1, mbl)
-            # mbl(mbl.index([bale1x, bale1y]))
-            # # print('mbl after', mbl)
-            # start to first bale
-            # # print('small collection\t', final_x, final_y)
-            # # print('bale location\t\t', bale1x, bale1y)
-            # # print('mid collection\t\t', collection_midx, collection_midy)
-            # small collection center to first bale
-            msd = small_obstaclepathsimple(grid, scp[0][0], scp[1][0], bale1x, bale1y, flag)
-            if msd != -1:
-                small_backtrackpath(bale1x, bale1y, msd)
-            for i in range(len(c)):
-                small_mid.append([c[i][0], c[i][1]])
-            for i in range(len(c)):
-                small_mid_each.append([c[i][0], c[i][1]])
-            c.clear()
-            b.clear()
-            # second bale to mid collection center
-            msd = small_obstaclepathsimple(grid, bale1x, bale1y, collection_midx, collection_midy, flag)
-            if msd != -1:
-                small_backtrackpath(collection_midx, collection_midy, msd)
-            for i in range(1, len(c)):
-                small_mid.append([c[i][0], c[i][1]])
-            for i in range(1, len(c)):
-                small_mid_each.append([c[i][0], c[i][1]])
-            c.clear()
-            b.clear()
-            carrybales('small_mid', lock, small_mid_each)
-            no = False
-            print('small car carry mid bale ', small_mid_each)
-            time.sleep(0.1)
-            mlock.acquire()
+        if mid_finished == False:
             mid_bale_number = len(mbl)
-            mlock.release()
-        baleslocation('mid')
+            while mid_bale_number != 0:
+                small_mid_each = []
+                mlock.acquire()
+                print('in small, mid remaining', len(mbl))
+                bale1x, bale1y = nearthefurthest(collection_midx, collection_midy, 1, mbl)
+                print('small is going to carry mid bales at', bale1x, bale1y)
+                mbl.pop(mbl.index([bale1x, bale1y]))
+                print('small after pop out', mbl)
+                mlock.release()
+                time.sleep(0.1)
+                # small collection center to first bale
+                msd = small_obstaclepathsimple(grid, scp[0][0], scp[1][0], bale1x, bale1y, flag)
+                if msd != -1:
+                    small_backtrackpath(bale1x, bale1y, msd)
+                for i in range(len(c)):
+                    small_mid.append([c[i][0], c[i][1]])
+                for i in range(len(c)):
+                    small_mid_each.append([c[i][0], c[i][1]])
+                c.clear()
+                b.clear()
+                # second bale to mid collection center
+                msd = small_obstaclepathsimple(grid, bale1x, bale1y, collection_midx, collection_midy, flag)
+                if msd != -1:
+                    small_backtrackpath(collection_midx, collection_midy, msd)
+                for i in range(1, len(c)):
+                    small_mid.append([c[i][0], c[i][1]])
+                for i in range(1, len(c)):
+                    small_mid_each.append([c[i][0], c[i][1]])
+                c.clear()
+                b.clear()
+                carrybales1('small_mid', bale1x, bale1y, lock, small_mid_each)
+                l = len(small_mid_each) - 1
+                step += l
+                no = False
+                print('small car carry mid bale, ', small_mid_each)
+                mlock.acquire()
+                mid_bale_number = len(mbl)
+                mlock.release()
+                time.sleep(0.1)
+                print('in small mid, mid remaining number = ', mid_bale_number)
 
+        if sbl == [] and mbl == [] and lbl == []:
+            baleslocation('small')
+            small_finished = True
     print('Exiting small vehicle')
 
 
 #### Mid truck: 2 mid
 def mid_bale(grid, start_x, start_y, final_x, final_y, flag, mlock, lock):
-    global no
+    global no, mid_finished, step
     print('start mid')
     baleslocation('mid')
     print('mid bales\t', mbl)
@@ -808,9 +855,16 @@ def mid_bale(grid, start_x, start_y, final_x, final_y, flag, mlock, lock):
         while mid_bale_number != 0:
             if mid_bale_number >= 2:
                 mid_each = []
+                mlock.acquire()
+                print('in mid, mid remaining', len(mbl))
                 b1x, b1y, b2x, b2y = nearthefurthest(start_x, start_y, 2, mbl)
-                # mbl(mbl.index([b1x, b1y]))
-                # mbl(mbl.index([b2x, b2y]))
+                print('mid is going to carry mid bales at', b1x, b1y, b2x, b2y)
+                # print("mbl kuan = ", mbl)
+                mbl.pop(mbl.index([b1x, b1y]))
+                mbl.pop(mbl.index([b2x, b2y]))
+                print('mid after pop out', mbl)
+                mlock.release()
+                time.sleep(0.1)
                 # last position to first bale
                 msd = mid_obstaclepathsimple(grid, mcp[0][0], mcp[1][0], b1x, b1y, flag)
                 if msd != -1:
@@ -842,17 +896,25 @@ def mid_bale(grid, start_x, start_y, final_x, final_y, flag, mlock, lock):
                 cc.clear()
                 bb.clear()
                 # carry the bales
-                carrybales('mid', lock, mid_each)
+                carrybales2('mid', b1x, b1y, b2x, b2y, lock, mid_each)
+                l = len(mid_each) - 1
+                step += l
                 no = False
                 # update the small bale number
-                print('mid path , carry 2 bales', mid_each)
+                mlock.acquire()
+                mid_bale_number = len(mbl)
+                mlock.release()
+                time.sleep(0.1)
+                print('mid path, carry 2 bales', mid_each)
             elif mid_bale_number == 1:
                 mid_each = []
+                mlock.acquire()
                 b1x, b1y = nearthefurthest(final_x, final_y, 1, mbl)
-                # mbl(mbl.index([b1x, b1y]))
+                mbl.pop(mbl.index([b1x, b1y]))
+                mlock.release()
+                time.sleep(0.1)
                 # to first bale
-                msd = mid_obstaclepathsimple(grid, mcp[0][0], mcp[1][0], b1x, b1y,
-                                             flag)
+                msd = mid_obstaclepathsimple(grid, mcp[0][0], mcp[1][0], b1x, b1y,flag)
                 if msd != -1:
                     mid_backtrackpath(b1x, b1y, msd)
                 for i in range(len(cc)):
@@ -872,23 +934,28 @@ def mid_bale(grid, start_x, start_y, final_x, final_y, flag, mlock, lock):
                 cc.clear()
                 bb.clear()
                 # carry the bales
-                carrybales('mid', lock, mid_each)
+                carrybales1('mid', b1x, b1y, lock, mid_each)
+                l = len(mid_each) - 1
+                step += l
                 no = False
                 # update the small bale number
-                print('mid path , carry 2 bales', mid_each)
-            time.sleep(0.1)
-            mlock.acquire()
-            mid_bale_number = len(mbl)
-            mlock.release()
-        baleslocation('mid')
+                mlock.acquire()
+                mid_bale_number = len(mbl)
+                mlock.release()
+                time.sleep(0.1)
+                print('mid path, carry 1 bales', mid_each)
+            print('in mid, mid remaining number = ', mid_bale_number)
 
+        if sbl == [] and mbl == [] and lbl == []:
+            baleslocation('mid')
+            mid_finished = True
     print('Exiting mid vehicle')
 
 
 #### Large truck:  2 small / 1 mid / 1 big
 def large_bale(grid, start_x, start_y, final_x, final_y, collection_midx, collection_midy, collection_smallx,
                collection_smally, flag, slock, mlock, llock, lock):
-    global no
+    global no, step
     print('start large')
     baleslocation('large')
     print('large bales\t', lbl)
@@ -905,8 +972,11 @@ def large_bale(grid, start_x, start_y, final_x, final_y, collection_midx, collec
         large_bale_number = len(lbl)
         while large_bale_number != 0:
             large_each = []
+            llock.acquire()
             bale1x, bale1y = nearthefurthest(final_x, final_y, 1, lbl)
-            # lbl(lbl.index([bale1x, bale1y]))
+            lbl.pop(lbl.index([bale1x, bale1y]))
+            llock.release()
+            time.sleep(0.1)
             # to first bale
             lsd = large_obstaclepathsimple(grid, lcp[0][0], lcp[1][0], bale1x, bale1y, flag)
             if lsd != -1:
@@ -928,132 +998,165 @@ def large_bale(grid, start_x, start_y, final_x, final_y, collection_midx, collec
             ccc.clear()
             bbb.clear()
             # carry the bales
-            carrybales('large', lock, large_each)
+            carrybales1('large', bale1x, bale1y, lock, large_each)
+            l = len(large_each) - 1
+            step += l
             no = False
             # update the large bale nubmer
-            print('large path ', large_each)
+            llock.acquire()
             large_bale_number = len(lbl)
-        baleslocation('large')
+            llock.release()
+            time.sleep(0.1)
+            print('large path', large_each)
 
         # carry small bales
-        small_bale_number = len(sbl)
-        while small_bale_number != 0:
-            if small_bale_number >= 2:
-                large_small_each = []
-                b1x, b1y, b2x, b2y = nearthefurthest(collection_smallx, collection_smally, 2, sbl)
-                # sbl.pop(sbl.index([b1x, b1y]))
-                # sbl.pop(sbl.index([b2x, b2y]))
-                # to first bale
-                ssd = large_obstaclepathsimple(grid, lcp[0][0], lcp[1][0], b1x, b1y, flag)
-                if ssd != -1:
-                    large_backtrackpath(b1x, b1y, ssd)
-                for i in range(len(ccc)):
-                    large_small.append([ccc[i][0], ccc[i][1]])
-                for i in range(len(ccc)):
-                    large_small_each.append([ccc[i][0], ccc[i][1]])
-                ccc.clear()
-                bbb.clear()
-                # first bale to second bale
-                ssd = large_obstaclepathsimple(grid, b1x, b1y, b2x, b2y, flag)
-                if ssd != -1:
-                    large_backtrackpath(b2x, b2y, ssd)
-                for i in range(1, len(ccc)):
-                    large_small.append([ccc[i][0], ccc[i][1]])
-                for i in range(1, len(ccc)):
-                    large_small_each.append([ccc[i][0], ccc[i][1]])
-                ccc.clear()
-                bbb.clear()
-                # second bale to small collection center
-                ssd = large_obstaclepathsimple(grid, b2x, b2y, collection_smallx, collection_smally, flag)
-                if ssd != -1:
-                    large_backtrackpath(collection_smallx, collection_smally, ssd)
-                for i in range(1, len(ccc)):
-                    large_small.append([ccc[i][0], ccc[i][1]])
-                for i in range(1, len(ccc)):
-                    large_small_each.append([ccc[i][0], ccc[i][1]])
-                ccc.clear()
-                bbb.clear()
-                # carry the bales
-                carrybales('small', lock, large_small_each)
-                no = False
-                # update the small bale number
-                small_bale_number = len(sbl)
-                print('large carry 2 small bales ', large_small_each)
-            elif small_bale_number == 1:
-                large_small_each = []
-                b1x, b1y = nearthefurthest(collection_smallx, collection_smally, 1, sbl)
-                # sbl.pop(sbl.index([b1x, b1y]))
-                # large collection to first bale
-                ssd = large_obstaclepathsimple(grid, final_x, final_y, b1x, b1y,
-                                               flag)
-                if ssd != -1:
-                    large_backtrackpath(b1x, b1y, ssd)
-                for i in range(len(ccc)):
-                    large_small.append([ccc[i][0], ccc[i][1]])
-                for i in range(len(ccc)):
-                    large_small_each.append([ccc[i][0], ccc[i][1]])
-                ccc.clear()
-                bbb.clear()
-                # first bale to small collection center
-                ssd = large_obstaclepathsimple(grid, b1x, b1y, collection_smallx,
-                                               collection_smally, flag)
-                if ssd != -1:
-                    large_backtrackpath(collection_smallx, collection_smally, ssd)
-                for i in range(1, len(ccc)):
-                    large_small.append([ccc[i][0], ccc[i][1]])
-                for i in range(1, len(ccc)):
-                    large_small_each.append([ccc[i][0], ccc[i][1]])
-                ccc.clear()
-                bbb.clear()
-                # carry the bales
-                carrybales('small', lock, large_small_each)
-                no = False
-                # update the small bale number
-                small_bale_number = len(sbl)
-                print('large carry 1 small bale ,', large_small_each)
-            baleslocation('small')
+        if small_finished == False:
+            small_bale_number = len(sbl)
+            while small_bale_number != 0:
+                if small_bale_number >= 2:
+                    large_small_each = []
+                    slock.acquire()
+                    b1x, b1y, b2x, b2y = nearthefurthest(collection_smallx, collection_smally, 2, sbl)
+                    sbl.pop(sbl.index([b1x, b1y]))
+                    sbl.pop(sbl.index([b2x, b2y]))
+                    slock.release()
+                    time.sleep(0.1)
+                    # sbl.pop(sbl.index([b1x, b1y]))
+                    # sbl.pop(sbl.index([b2x, b2y]))
+                    # to first bale
+                    ssd = large_obstaclepathsimple(grid, lcp[0][0], lcp[1][0], b1x, b1y, flag)
+                    if ssd != -1:
+                        large_backtrackpath(b1x, b1y, ssd)
+                    for i in range(len(ccc)):
+                        large_small.append([ccc[i][0], ccc[i][1]])
+                    for i in range(len(ccc)):
+                        large_small_each.append([ccc[i][0], ccc[i][1]])
+                    ccc.clear()
+                    bbb.clear()
+                    # first bale to second bale
+                    ssd = large_obstaclepathsimple(grid, b1x, b1y, b2x, b2y, flag)
+                    if ssd != -1:
+                        large_backtrackpath(b2x, b2y, ssd)
+                    for i in range(1, len(ccc)):
+                        large_small.append([ccc[i][0], ccc[i][1]])
+                    for i in range(1, len(ccc)):
+                        large_small_each.append([ccc[i][0], ccc[i][1]])
+                    ccc.clear()
+                    bbb.clear()
+                    # second bale to small collection center
+                    ssd = large_obstaclepathsimple(grid, b2x, b2y, collection_smallx, collection_smally, flag)
+                    if ssd != -1:
+                        large_backtrackpath(collection_smallx, collection_smally, ssd)
+                    for i in range(1, len(ccc)):
+                        large_small.append([ccc[i][0], ccc[i][1]])
+                    for i in range(1, len(ccc)):
+                        large_small_each.append([ccc[i][0], ccc[i][1]])
+                    ccc.clear()
+                    bbb.clear()
+                    # carry the bales
+                    carrybales2('small', b1x, b1y, b2x, b2y, lock, large_small_each)
+                    l = len(large_small_each) - 1
+                    step += l
+                    no = False
+                    # update the small bale number
+                    slock.acquire()
+                    small_bale_number = len(sbl)
+                    slock.release()
+                    time.sleep(0.1)
+                    print('large carry 2 small bales, ', large_small_each)
+                elif small_bale_number == 1:
+                    large_small_each = []
+                    slock.acquire()
+                    b1x, b1y = nearthefurthest(collection_smallx, collection_smally, 1, sbl)
+                    sbl.pop(sbl.index([b1x, b1y]))
+                    slock.release()
+                    time.sleep(0.1)
+                    # sbl.pop(sbl.index([b1x, b1y]))
+                    # large collection to first bale
+                    ssd = large_obstaclepathsimple(grid, final_x, final_y, b1x, b1y,
+                                                   flag)
+                    if ssd != -1:
+                        large_backtrackpath(b1x, b1y, ssd)
+                    for i in range(len(ccc)):
+                        large_small.append([ccc[i][0], ccc[i][1]])
+                    for i in range(len(ccc)):
+                        large_small_each.append([ccc[i][0], ccc[i][1]])
+                    ccc.clear()
+                    bbb.clear()
+                    # first bale to small collection center
+                    ssd = large_obstaclepathsimple(grid, b1x, b1y, collection_smallx,
+                                                   collection_smally, flag)
+                    if ssd != -1:
+                        large_backtrackpath(collection_smallx, collection_smally, ssd)
+                    for i in range(1, len(ccc)):
+                        large_small.append([ccc[i][0], ccc[i][1]])
+                    for i in range(1, len(ccc)):
+                        large_small_each.append([ccc[i][0], ccc[i][1]])
+                    ccc.clear()
+                    bbb.clear()
+                    # carry the bales
+                    carrybales1('small', b1x, b1y, lock, large_small_each)
+                    l = len(large_small_each) - 1
+                    step += l
+                    no = False
+                    # update the small bale number
+                    slock.acquire()
+                    small_bale_number = len(sbl)
+                    slock.release()
+                    time.sleep(0.1)
+                    print('large carry 1 small bale, ,', large_small_each)
 
         # carry mid bales
-        mid_bale_number = len(mbl)
-        while mid_bale_number != 0:
-            large_mid_each = []
-            bale1x, bale1y = nearthefurthest(collection_midx, collection_midy, 1, mbl)
-            # mbl(mbl.index([bale1x, bale1y]))
-            msd = large_obstaclepathsimple(grid, lcp[0][0], lcp[1][0], bale1x, bale1y, flag)
-            if msd != -1:
-                large_backtrackpath(bale1x, bale1y, msd)
-            for i in range(len(ccc)):
-                large_mid.append([ccc[i][0], ccc[i][1]])
-            for i in range(len(ccc)):
-                large_mid_each.append([ccc[i][0], ccc[i][1]])
-            ccc.clear()
-            bbb.clear()
-            # second bale to collection center
-            msd = large_obstaclepathsimple(grid, bale1x, bale1y, collection_midx, collection_midy, flag)
-            if msd != -1:
-                large_backtrackpath(collection_midx, collection_midy, msd)
-            for i in range(1, len(ccc)):
-                large_mid.append([ccc[i][0], ccc[i][1]])
-            for i in range(1, len(ccc)):
-                large_mid_each.append([ccc[i][0], ccc[i][1]])
-            ccc.clear()
-            bbb.clear()
-            # carry the bales
-            carrybales('mid', lock, large_mid_each)
-            no = False
-            # update the mid bale nubmer
+        if mid_finished == False:
             mid_bale_number = len(mbl)
-            print('large carry mid bale ', large_mid_each)
-        baleslocation('mid')
+            while mid_bale_number != 0:
+                large_mid_each = []
+                mlock.acquire()
+                bale1x, bale1y = nearthefurthest(collection_midx, collection_midy, 1, mbl)
+                mbl.pop(mbl.index([bale1x, bale1y]))
+                mlock.release()
+                time.sleep(0.1)
+                # to the first bale
+                msd = large_obstaclepathsimple(grid, lcp[0][0], lcp[1][0], bale1x, bale1y, flag)
+                if msd != -1:
+                    large_backtrackpath(bale1x, bale1y, msd)
+                for i in range(len(ccc)):
+                    large_mid.append([ccc[i][0], ccc[i][1]])
+                for i in range(len(ccc)):
+                    large_mid_each.append([ccc[i][0], ccc[i][1]])
+                ccc.clear()
+                bbb.clear()
+                # second bale to collection center
+                msd = large_obstaclepathsimple(grid, bale1x, bale1y, collection_midx, collection_midy, flag)
+                if msd != -1:
+                    large_backtrackpath(collection_midx, collection_midy, msd)
+                for i in range(1, len(ccc)):
+                    large_mid.append([ccc[i][0], ccc[i][1]])
+                for i in range(1, len(ccc)):
+                    large_mid_each.append([ccc[i][0], ccc[i][1]])
+                ccc.clear()
+                bbb.clear()
+                # carry the bales
+                carrybales1('mid', bale1x, bale1y, lock, large_mid_each)
+                l = len(large_mid_each) - 1
+                step += l
+                no = False
+                # update the mid bale nubmer
+                mlock.acquire()
+                mid_bale_number = len(mbl)
+                mlock.release()
+                time.sleep(0.1)
+                print('large carry mid bale, ', large_mid_each)
 
-
+        if sbl == [] and mbl == [] and lbl == []:
+            baleslocation('large')
 
     print('Exiting large vehicle')
 
 
 #### weed: 1 weed
 def weed_bale(grid, start_x, start_y, final_x, final_y, flag, lock):
-    global no
+    global no, step
     print('strart weed')
     baleslocation('weed')
     print('weed bales\t', wbl)
@@ -1088,10 +1191,13 @@ def weed_bale(grid, start_x, start_y, final_x, final_y, flag, lock):
                 weed_each.append([cccc[i][0], cccc[i][1]])
             cccc.clear()
             bbbb.clear()
-            carrybales('weed', lock, weed_each)
+            carrybales1('weed', bale1x, bale1y, lock, weed_each)
+            l = len(weed_each) - 1
+            step += l
             no = False
-            print('weed path ', weed_each)
+            print('weed path', weed_each)
             weed_bale_number = len(wbl)
+
         baleslocation('weed')
 
     print('Exiting weed vehicle')
@@ -1154,7 +1260,7 @@ print('large\tcollection center\t', large_final_x, large_final_y)
 print('weed\tcollection center\t', weed_final_x, weed_final_y)
 print('')
 
-# start threads
+
 ts.start()
 tm.start()
 tl.start()
@@ -1166,6 +1272,9 @@ tm.join()
 tl.join()
 tw.join()
 addbales.join()
+
+print(kuan)
+print('overall steps', step)
 
 finish = time.perf_counter()
 print(f'Finished in {round(finish - start, 2)} seconds(s)')
