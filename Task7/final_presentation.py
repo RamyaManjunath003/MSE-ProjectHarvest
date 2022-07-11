@@ -96,7 +96,6 @@ no = False
 small_finished = False
 mid_finished = False
 
-#### only calculate the shortest path number, give 1 in the end
 
 # obstacles path simple, return the shortest distance
 def small_obstaclepathsimple(grid, startx, starty, finalx, finaly, flag):
@@ -218,8 +217,6 @@ def weed_obstaclepathsimple(grid, startx, starty, finalx, finaly, flag):
     # # print('no way')
     return -1
 
-
-### Back Track Path
 
 # back track path, show the driven path
 def small_backtrackpath(finalx, finaly, total_step):
@@ -416,6 +413,7 @@ def carrybales1(which_bale, bale1x, bale1y, lock, *bales):
             lock.release()
             time.sleep(0.1)
 
+
 def carrybales2(which_bale, bale1x, bale1y, bale2x, bale2y, lock, *bales):
     global scp, mcp, lcp, wcp, no
     if which_bale == 'small':
@@ -518,6 +516,7 @@ def carrybales2(which_bale, bale1x, bale1y, bale2x, bale2y, lock, *bales):
             lock.release()
             time.sleep(0.1)
 
+
 def carrybales3(which_bale, bale1x, bale1y, bale2x, bale2y, bale3x, bale3y, lock, *bales):
     global scp, mcp, lcp, wcp, no
     if which_bale == 'small':
@@ -560,21 +559,6 @@ def baleslocation(which_bale):
                 if kuan[i][j] == 4:
                     wbl.append([i, j])
 
-
-### The furthest bale to collection center
-def furthestbale(collectionx, collectiony, *bales):
-    kuantable = []  # empty list, for storing each bale distance to the collection
-    total = len(bales[0])  # how many bales from the input list?
-    # calculate the distance and store in the list, distance, x, y
-    for i in range(total):
-        distance = small_obstaclepathsimple(kuan, collectionx, collectiony, bales[0][i][0], bales[0][i][1], 1)
-        kuantable.append([distance, bales[0][i][0], bales[0][i][1]])
-    kuantable.sort()  # the shortest will be the first
-    kuantable.reverse()  # but I want to furtheest, so I reverse the list
-    return kuantable[0][1], kuantable[0][2]  # return the furthest bale x, y
-
-
-### The closest two bales near the furthest bale
 
 # maybe need to add a nubmer argument
 def nearthefurthest(farawaybalex, farawaybaley, number, *bales):
