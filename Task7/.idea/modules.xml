@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/kuan_Task7_Simulation.iml" filepath="$PROJECT_DIR$/.idea/kuan_Task7_Simulation.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Task7.iml" filepath="$PROJECT_DIR$/.idea/Task7.iml" />
     </modules>
   </component>
 </project>
